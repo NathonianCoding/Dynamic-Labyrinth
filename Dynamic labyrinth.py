@@ -1,16 +1,4 @@
-###To do:
 
-
-
-#implement GUI login system
-#implement leaderboard
-#implement endscreen window allowing player to logout, play again (if game lost)
-#implement pause/ save and exit feature
-#delete saved games when plyer loses and set new gameIDs
-#use MAX() aggregate function
-
-
-#checkList: Graph, depth-first search algorithm, stack, 2d array, dictionary, OOP
 #Note: coin sprites were taken from OpenGameArt.org
 
 import pygame,sys,random,math, time
@@ -1281,3 +1269,4 @@ while not gameOver:
 
         
     
+
