@@ -12,7 +12,8 @@ class Manager:
         gameSelectedInfo=None
         gameID=None
         accountOpen=None
-       
+
+        # Displays and manages the login/sign up window
         @classmethod
         def display_menu(cls):
        
@@ -57,6 +58,7 @@ class Manager:
        
 
         @classmethod
+    #Resets the game state so that saved games can be regenerated
         def resetState(cls,state, game, levelInfo):
                 cls.gameState = state
                 cls.gameSelected=game
@@ -76,6 +78,7 @@ class Manager:
                 
 
         @classmethod
+    # Enables the user to log off, saving games and deleting completed saved games to maintain the database
         def logOff(cls, score,levelStartScore, level, maze_size, condition,gameLost=False):
                 
                 
@@ -95,6 +98,7 @@ class Manager:
                 cls.accountOpen=None
 
         @classmethod
+        #returns the top 10 high scores in descending order
         def getTop10(cls):
                 leaderboard=cursor.execute("SELECT username, bestScore  FROM accounts ").fetchall()
                 mergeSort(leaderboard)
@@ -109,7 +113,7 @@ class Manager:
 
         
                 
-                
+# sorts a list of (player,score) tuples in descending order of score                
 def mergeSort(leaderboard):
         
         if len(leaderboard)>1:
@@ -152,7 +156,7 @@ def mergeSort(leaderboard):
                         j+=1
                         m+=1
                 
-
+# encrypts passwords using vernam cipher
 def encrypt(password):
         key=""
         for i in range(len(password)):
@@ -164,7 +168,7 @@ def encrypt(password):
                 
                 cipher+= chr(ord(key[i]) ^ ord(password[i]))
         return cipher + key
-
+#decrypts passwords so they can be compared to the user's input
 def decrypt(cipher):
         password, key = cipher[:len(cipher)//2], cipher[len(cipher)//2:]
 
@@ -180,7 +184,7 @@ def decrypt(cipher):
         return plainText, cipher
                 
         
-    
+# Fetches saved games linked to the user's account once they have logged in successfully, updating the login/sign up window   
 def login(username, password):
         
         data=getGames(username, password)
@@ -227,7 +231,7 @@ def login(username, password):
 
 
 
-
+#Validates the username and password input. If the username is available and the password meets the minimum requirements a new account is added to the database. Otherwise, an error message is displayed on the GUI
 def sign_up(username, password):
         
         
@@ -269,7 +273,7 @@ def sign_up(username, password):
 
 
         
-
+# Returns the saved games linked to an account if login details entered are correct. Returns an error message otherwise
 def getGames(username, password):
  
     
@@ -301,7 +305,7 @@ def getGames(username, password):
 
 
 
-
+# Returns "Complete" if the username and password are valid. Otherwise, an appropriate error message is returned
 def validate(username, password):
     if len(password.strip())<8:
         return "Your password is too weak                           "
@@ -325,7 +329,7 @@ def validate(username, password):
 
 
 
-
+# Updates data about an acount on the database, including: total games plaed, total score, personal best score, average score and saves new games to the account
 def updateDB(score,levelStartScore, level, maze_size, save=False):         
     accountID=Manager.accountOpen
         
@@ -437,5 +441,6 @@ if __name__ == '__main__':
 
           
     
+
 
 
