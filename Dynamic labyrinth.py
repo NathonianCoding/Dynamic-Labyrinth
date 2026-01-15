@@ -8,7 +8,7 @@ import pygame.time as GAME_TIME
 from db import getGames, validate, updateDB, login, sign_up, Manager
 
 
-# Displays and manages the ttorial window
+# Displays and manages the tutorial window
 def howToPlay():
     pygame.init()
     pygame.font.init()
@@ -1268,5 +1268,6 @@ while not gameOver:
 
         
     
+
 
 
