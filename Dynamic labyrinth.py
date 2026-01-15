@@ -8,7 +8,7 @@ import pygame.time as GAME_TIME
 from db import getGames, validate, updateDB, login, sign_up, Manager
 
 
-
+# Displays and manages the ttorial window
 def howToPlay():
     pygame.init()
     pygame.font.init()
@@ -46,7 +46,7 @@ def howToPlay():
     
 
 
-
+# Displays and Manages the leaderboard after the game has ended 
 def exitGame():
     leaderboard=Manager.getTop10()
 
@@ -162,7 +162,7 @@ justReset=False
 
 #Game code
 
-
+# Handles the logic of the countdown animation. After there are 10 seconds left, the timer's colour changes to red.
 def countDown(timeLeft,start_time):
     timeLeft=120-(GAME_TIME.get_ticks()//1000-start_time)
     if timeLeft>10:
@@ -181,7 +181,7 @@ class Cell:
     
  
     
-
+    # initiates each cell object(cell ojects represent squares in the grid)
     def __init__(self,x,y,cell_size):
         self.row=y//cell_size
         self.column=x//cell_size
@@ -216,7 +216,7 @@ class Cell:
         
         
         
-
+     # Draws the walls of a cell to create the grid
     def draw(self):
         if self.visited:
             pygame.draw.rect(surface, pygame.Color('black') , (self.x,self.y,self.size,self.size))
@@ -237,6 +237,7 @@ class Cell:
             
             pygame.draw.line(surface, pygame.Color('darkorange'), (self.x,self.y), (self.x, self.y+self.size),1)
 
+    # returns a list of unvisited neighbouring cells. This method is used in the dfs algorithm that generates the maze
     def get_next(self,curr):
         
         neighbours=[]
@@ -272,7 +273,7 @@ class Cell:
     
     
 
-
+# creates square grids. Walls are removed to generate a maze.   
 def create_grid(cell_size):
     maze_size=WIDTH//cell_size
     for row in range(0,WIDTH,cell_size):
@@ -284,7 +285,7 @@ def create_grid(cell_size):
     curr_cell=maze_grid[0][maze_size//2]
     curr_cell.visited=True
 
-    #creates maze circuit
+    #creates maze circuit allowing the player to move freely around the edge of the maze
     for row in range(0,maze_size,maze_size-1):
         
         for column in range(0,maze_size-1):
@@ -329,7 +330,7 @@ class Player:
         self.x,self.y=self.curr_cell.x+self.radius,self.curr_cell.y+self.radius
 
         
-
+    #Updates the attributes: row, column, x and y  
     def update(self):
         self.x,self.y=self.curr_cell.x+self.radius,self.curr_cell.y+self.radius
         self.row,self.column=self.x//self.curr_cell.size,self.y//self.curr_cell.size
@@ -344,7 +345,7 @@ class Player:
         
         pygame.draw.circle(surface, pygame.Color('orange'), (self.x,self.y), self.radius,0)
 
-    
+    #Returns true if the player can move in a specific direction (up, down, left or right) from a specific cell 
     def moveAllowed(self,cell,direction):
         if direction== 'top':
      
@@ -358,7 +359,7 @@ class Player:
         else:
             return (cell.left is not None) and (not cell.wall['left'])
 
-    
+    # Moves the player from one cell to the next according to the directionand updates the player object
     def move(self,direction):
         if direction=='top':
             self.curr_cell=maze_grid[self.curr_cell.top[0]][self.curr_cell.top[1]]
@@ -427,7 +428,7 @@ class Zombie(Player):
         
         
         
-    #polymorphism + inheritance
+    #Zombie objects move differently from the player. This method move a zombie object in a direction incrementally, whereas the move method for a Player object moves the player from one cell to the next in one step.
     def move(self, direction): # getDir() passed as parameter
      
         if direction == 'top' and self.moveAllowed(self.curr_cell, 'top'):
@@ -490,15 +491,16 @@ class Zombie(Player):
         
     def draw(self):
         pygame.draw.circle(surface, pygame.Color('green'), (self.x,self.y), self.radius,0)
-
+        
+    # returns the eucledian distance between a zombie object and the player
     def getDistance(self,a,b):
         return math.sqrt((a.x-b.x)**2+(a.y-b.y)**2)
-    
+ 
+    #heurisitic = distance from player + length of path calculated
     def setHeuristic(self):
-        #heurisitic = distance from player + length of path calculated
         return len(self.path)+self.getDistance(self.curr_cell, player.curr_cell)
 
-
+    # Implements an A* search algorithm
     def getPath(self,target):
         # weight=cost(ie a move)+distance
         
@@ -549,12 +551,7 @@ class Zombie(Player):
                         
                   
             queue=dict(sorted(queue.items(), key=lambda item: item[1]))
-
-            
-
-            
             del queue[cell]
-            
             cell=[i for i in queue.items()][0][0]
             
             
@@ -595,7 +592,7 @@ class Zombie(Player):
 
 
        
-        
+    #Returns the direction ("top", "bottom", "left", "right") if the zombie hasn't traversed the whole path. Otherwise, a new path is generated and the next direction is returned    
     def getDir(self):
         if len(self.path)>1:
             next_cell=self.path[self.curr_cell]
@@ -612,7 +609,7 @@ class Zombie(Player):
             
         
 
-       
+    # Returns true if the zombie has caught the player   
     def bitPlayer(self):
        
         return self.getDistance(player, self) < self.radius
@@ -642,7 +639,7 @@ class Coin(Player):
 
     
   
-
+    # Hashesa coin object to compute the cell to place it in
     def hash(self):
      
    
@@ -670,7 +667,7 @@ class Coin(Player):
         return curr_cell 
 
     
-    #recursion
+    #Uses recursion to deal with hashing collisions
     def reHash(self, cell, prev=None):
         
         #if cell already contains a coin, the coin will be placed in an adjacent cell that the player can access
@@ -702,7 +699,7 @@ class Coin(Player):
 
 
 
-
+     # Draws one of the images (0.png to 7.png (see Dynamic Labyrinth Assets)) to animate rotating coins
     def draw(self):
         image=pygame.image.load(str(coinPhase)+ ".png")
         surface.blit(image, (self.curr_cell.x-20, self.curr_cell.y-20))
@@ -711,7 +708,7 @@ class Coin(Player):
 
 
 
-
+    #Returns true if a coin has been collected by the player and sets the attribute 'collected' to true
     def checkIfCollected(self):
         
  
@@ -735,7 +732,7 @@ class Coin(Player):
 
 
 
-
+# uses  dfs algorithm to dynamically generate a maze from a square grid template
 def generate_maze():
     #creates maze, implementing backtracking 
     while stack:
@@ -786,7 +783,7 @@ def generate_maze():
                 next_cell.visited=True
         else:
             stack.pop()
-        
+# Draws the maze       
 def draw_maze(maze_size):
     
     for row in range(maze_size):
@@ -803,7 +800,7 @@ generate_maze()
 # creates exit in centre of the maze
 exit_cell=maze_grid[maze_size//2][maze_size//2] 
 
-
+# Generates a harder level and returns the new maze size and cell size so the maze can be created
 def nextLevel(cell_size):
     maze_grid.clear()
    
@@ -839,7 +836,7 @@ def nextLevel(cell_size):
 
 player=Player(0,maze_size//2)
 
-
+# Spawns zombie objects. A new path is generated for zombies that are not moving to stop them going through walls; it needs to fully be in a single cell before a new path can be generated
 def spawnZombies(maze_size, speed):
     
     
@@ -855,7 +852,7 @@ def spawnZombies(maze_size, speed):
         
 
 
-
+# Generates a random number of coins depending on the level.
 def generateCoins(level):
 
     if level == 1:
@@ -867,7 +864,7 @@ def generateCoins(level):
     for i in range(count):
         Coin()
   
-       
+# Draws coins that aren't collected. If a coin is collected, it isn't displayed anymore       
 def drawCoins():
     
     for row in range(maze_size):
@@ -892,7 +889,7 @@ def drawCoins():
 
 
 
-
+# Displays and manages the pause GUI
 def pause():
     button1= "Resume"
     button2= "Save and log out"
@@ -953,7 +950,7 @@ def pause():
 
 
 
-
+# Displays and manages the endscreen GUI where the options to play again or quit are displayed
 def endScreen():
     button1= "Play again"
     button2= "Quit and log out"
@@ -1005,7 +1002,7 @@ def endScreen():
     return index == 1 # returns true if player wants to quit
     
 
-
+# Resets the game state to the first level, so the player can play again after losing
 def reset():
     
     level=1
@@ -1037,6 +1034,8 @@ gameFont=pygame.font.SysFont('Comic Sans MS', 30)
 
 surface=pygame.display.set_mode((WIDTH,HEIGHT))
 screen = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA) # semi-transparent when game is paused
+
+
 while not gameOver:
     justReset=False
     
@@ -1269,4 +1268,5 @@ while not gameOver:
 
         
     
+
 
